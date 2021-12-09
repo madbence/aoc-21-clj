@@ -18,16 +18,14 @@
   (if (= (get grid pos) 9)
     nil
     (loop [basin #{pos}
-           visited #{}
            queue #{pos}]
       (if (empty? queue)
         basin
         (let [pos (first queue)
               neighbours (->> pos get-neighbours (filter #(not= (get grid % 9) 9)))]
           (recur (into basin neighbours)
-                 (conj visited pos)
                  (into (disj queue pos)
-                       (filter #(not (visited %)) neighbours))))))))
+                       (filter #(not (basin %)) neighbours))))))))
 
 (defn a [input]
   (let [grid (parse-input input)]
