@@ -2,15 +2,13 @@
   (:require [madbence.aoc-21.day-09 :refer [parse-input]]))
 
 (defn neighbours [[x y]]
-  (for [x' (range -1 2)
-        y' (range -1 2)
-        :when (not (and (= x' 0) (= y' 0)))] [(+ x x') (+ y y')]))
-
-(defn map' [f m]
-  (into {} (map #(assoc % 1 (f (second %)))) m))
+  (for [x' [-1 0 1]
+        y' [-1 0 1]
+        :let [p [(+ x x') (+ y y')]]
+        :when (not= p [x y])] p))
 
 (defn evolve [grid]
-  (loop [grid (map' inc grid)
+  (loop [grid (into {} (for [[p v] grid] [p (inc v)]))
          flashed #{}]
     (let [just-flashed (->> grid
                             (filter #(< 9 (second %)))
@@ -21,7 +19,7 @@
                         (filter #(contains? grid %)))
           grid' (reduce #(update %1 %2 inc) grid affected)]
       (if (= grid grid')
-        (map' #(if (< 9 %) 0 %) grid)
+        (into {} (for [[p v] grid] (if (< 9 v) [p 0] [p v])))
         (recur grid' (into flashed just-flashed))))))
 
 (defn a [input]
