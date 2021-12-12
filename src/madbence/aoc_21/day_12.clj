@@ -2,30 +2,23 @@
   (:require [clojure.string :refer [split-lines upper-case]]
             [clojure.set :refer [difference]]))
 
-(defn add-edge [g [from to]]
-  (-> g
-      (update from (fnil conj #{}) to)
-      (update to (fnil conj #{}) from)))
-
 (defn parse-input [input]
   (->> input
        split-lines
        (map #(re-matches #"(\w+)-(\w+)" %))
        (map rest)
-       (reduce add-edge {})))
-
-(defn small? [node]
-  (not= node (upper-case node)))
+       (mapcat #(vector % (reverse %)))
+       (reduce #(update %1 (first %2) (fnil conj #{}) (second %2)) {})))
 
 (defn paths-from [g visited from to can-visit-twice]
   (if (= from to)
     #{[to]}
     (->> (-> g (get from) (difference visited))
-         (map (fn [node]
-                (if (and can-visit-twice (small? node))
-                  (into (paths-from g (conj visited node) node to true)
-                        (paths-from g visited node to false))
-                  (paths-from g (if (small? node) (conj visited node) visited) node to can-visit-twice))))
+         (map #(cond
+                 (= % (upper-case %)) (paths-from g visited % to can-visit-twice)
+                 (not can-visit-twice) (paths-from g (conj visited %) % to false)
+                 :else (into (paths-from g (conj visited %) % to true)
+                             (paths-from g visited % to false))))
          (reduce into #{})
          (map #(conj % from))
          set)))
