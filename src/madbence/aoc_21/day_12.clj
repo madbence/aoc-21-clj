@@ -2,13 +2,10 @@
   (:require [clojure.string :refer [split-lines upper-case]]
             [clojure.set :refer [difference]]))
 
-(defn conj' [coll v]
-  (conj (if (nil? coll) #{} coll) v))
-
 (defn add-edge [g [from to]]
   (-> g
-      (update from conj' to)
-      (update to conj' from)))
+      (update from (fnil conj #{}) to)
+      (update to (fnil conj #{}) from)))
 
 (defn parse-input [input]
   (->> input
