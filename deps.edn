@@ -1,2 +1,4 @@
 {:aliases
- {:test {:extra-paths ["test"]}}}
+ {:test {:extra-paths ["test"]}}
+ :deps
+ {org.clojure/data.priority-map {:mvn/version "1.1.0"}}}
