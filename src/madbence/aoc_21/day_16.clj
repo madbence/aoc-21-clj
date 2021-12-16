@@ -70,12 +70,10 @@
   (let [version (parse-field bits offset 3)
         type (parse-field bits (+ offset 3) 3)]
     (merge {:version version :type type}
-           (if (= type 4)
-             (parse-literal bits (+ offset 6))
-             (let [mode (parse-field bits (+ offset 6) 1)]
-               (if (= mode 0)
-                 (parse-operator-by-length bits (+ offset 7))
-                 (parse-operator-by-count bits (+ offset 7))))))))
+           (cond
+             (= type 4) (parse-literal bits (+ offset 6))
+             (zero? (parse-field bits (+ offset 6) 1)) (parse-operator-by-length bits (+ offset 7))
+             :else (parse-operator-by-count bits (+ offset 7))))))
 
 (defn decode-packet [hex]
   (parse-packet (mapcat #(get hex->bin %) hex) 0))
